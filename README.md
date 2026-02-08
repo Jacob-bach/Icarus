@@ -230,7 +230,3 @@ MIT License - See LICENSE file for details
 ## Contributing
 
 Contributions welcome! Please open an issue or PR on GitHub.
-
----
-
-**Built with ❤️ for autonomous developers**
