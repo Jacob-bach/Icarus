@@ -1,0 +1,29 @@
+allowed_domains:
+  # Package Registries
+  - pypi.org
+  - files.pythonhosted.org
+  - npmjs.com
+  - registry.npmjs.org
+  
+  # Version Control
+  - github.com
+  - githubusercontent.com
+  - raw.githubusercontent.com
+  
+  # API Services
+  - api.tavily.com
+  - api.openai.com
+  - api.anthropic.com
+  
+  # Documentation (Common)
+  - docs.python.org
+  - developer.mozilla.org
+  - stackoverflow.com
+  - readthedocs.io
+  
+  # CDN & Resources
+  - cdnjs.cloudflare.com
+  - unpkg.com
+
+# User-approved domains will be added here dynamically
+user_approved_domains: []

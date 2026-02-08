@@ -1,0 +1,34 @@
+# ==================================================================
+# ICARUS Orchestrator - Production Dependencies
+# ==================================================================
+# Based on import analysis of source code - 2026-02-07
+# 
+# IMPORTANT: Requires native Windows Python (from python.org)
+# MSYS2/MinGW Python cannot compile required C extensions
+
+# Web Framework
+fastapi>=0.100.0,<0.111.0
+uvicorn>=0.20.0
+
+# Data Validation (v1 - pure Python)
+pydantic>=1.10.0,<2.0.0
+
+# Database
+sqlalchemy>=2.0.0
+aiosqlite>=0.19.0
+
+# Docker SDK (requires pywin32 on Windows)
+docker>=6.0.0
+
+# System Monitoring
+psutil>=5.9.0
+
+# HTTP Client
+httpx>=0.25.0
+
+# GitHub Integration
+PyGithub>=2.0.0
+
+# Configuration
+python-dotenv>=1.0.0
+PyYAML>=6.0.0

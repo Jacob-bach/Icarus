@@ -1,0 +1,29 @@
+FROM python:3.14.3-slim-bookworm
+
+WORKDIR /app
+
+# Create non-root user early
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Copy requirements first for better cache utilization
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY common/ ./common/
+COPY sentinel/ ./sentinel/
+
+# Set ownership to non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Health check - verify sentinel is monitoring
+HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "from sentinel.monitor import SystemMonitor; print('healthy')" || exit 1
+
+# Run sentinel as standalone service
+CMD ["python", "-c", "import asyncio; from sentinel.monitor import SystemMonitor; asyncio.run(SystemMonitor().start())"]

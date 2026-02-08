@@ -1,0 +1,92 @@
+.terminal-container {
+    background: #0a0e27;
+    border: 1px solid #2d3748;
+}
+
+.terminal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.terminal-header h3 {
+    color: var(--accent-green);
+}
+
+.connection-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.connection-status.connected {
+    color: var(--accent-green);
+}
+
+.connection-status.disconnected {
+    color: var(--text-secondary);
+}
+
+.terminal-output {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    max-height: 400px;
+    overflow-y: auto;
+    background: #000;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.terminal-empty {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.terminal-line {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.terminal-timestamp {
+    color: var(--text-secondary);
+    margin-right: 0.5rem;
+}
+
+.terminal-message {
+    color: #e8eaf0;
+}
+
+.terminal-line.error .terminal-message {
+    color: var(--accent-red);
+}
+
+.terminal-line.warning .terminal-message {
+    color: var(--accent-yellow);
+}
+
+.terminal-line.info .terminal-message {
+    color: var(--accent-blue);
+}
+
+.terminal-line.status .terminal-message {
+    color: var(--accent-green);
+}
+
+.terminal-output::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-output::-webkit-scrollbar-track {
+    background: #0a0e27;
+}
+
+.terminal-output::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.terminal-output::-webkit-scrollbar-thumb:hover {
+    background: #4a5568;
+}

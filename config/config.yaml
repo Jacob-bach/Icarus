@@ -1,0 +1,81 @@
+orchestrator:
+  host: "0.0.0.0"
+  port: 8000
+  max_concurrent_jobs: 2
+  job_timeout_seconds: 1800  # 30 minutes
+
+sentinel:
+  enabled: true
+  yellow_threshold: 80  # CPU/RAM percentage
+  red_threshold: 90
+  poll_interval_seconds: 5
+  
+agents:
+  builder:
+    image_name: "icarus-builder:latest"
+    cpu_limit: 1.0  # CPU cores
+    memory_limit: 1073741824  # 1GB in bytes
+    timeout_seconds: 600  # 10 minutes
+    network_mode: "bridge"
+    
+  checker:
+    image_name: "icarus-checker:latest"
+    cpu_limit: 0.5
+    memory_limit: 536870912  # 512MB in bytes
+    timeout_seconds: 300  # 5 minutes
+    network_mode: "bridge"
+
+workspace:
+  base_path: "/workspace"
+  mount_type: "volume"  # or "bind"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# ============================================
+# ICARUS v2.0 Feature Flags
+# ============================================
+features:
+  # Phase I features (Weeks 1-6)
+  enable_reflection: false          # Iterative code improvement
+  enable_tdd_integration: false     # Test-driven development support
+  enable_enhanced_security: false   # Production-grade container hardening
+  
+  # Phase II features (Weeks 7-12)
+  enable_rag_memory: false          # Cross-job learning
+
+# ============================================
+# v2.0 Component Configuration
+# ============================================
+
+# Reflection Engine Settings
+reflection:
+  max_iterations: 3
+  llm_provider: "openai"            # openai, anthropic, local
+  llm_model: "gpt-4-turbo"
+  temperature: 0.7
+
+# Test-Driven Development Settings
+testing:
+  pytest_timeout: 60                # seconds
+  max_test_iterations: 3
+  supported_frameworks:
+    - pytest                        # Python
+    # Future: jest, mocha
+
+# Enhanced Security Settings
+security:
+  use_non_root_containers: true    # Run containers as UID 1000
+  use_seccomp_profiles: true       # Syscall filtering
+  enable_security_monitoring: true  # Runtime threat detection
+  drop_capabilities: true           # Drop unnecessary Linux capabilities
+
+# RAG Memory Settings (Phase II)
+memory:
+  vector_db: "chromadb"
+  embedding_model: "text-embedding-3-small"
+  embedding_dimensions: 1536
+  persist_directory: "/data/memory"
+  max_patterns_per_query: 3
+  similarity_threshold: 0.7
