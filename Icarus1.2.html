@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICARUS Architecture — v1.2.0</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg: #0f1419;
+            --surface: #161b22;
+            --surface-2: #1c2128;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-dim: #8b949e;
+            --text-faint: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-cyan: #3bc9db;
+            --accent-orange: #f0883e;
+            --accent-green: #3fb950;
+            --accent-purple: #bc8cff;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --accent-teal: #39d0d8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            line-height: 1.5;
+            padding: 48px 60px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* Typography */
+        .page-title {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: var(--text-dim);
+            margin-bottom: 56px;
+            font-weight: 400;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-blue);
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .section-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 32px;
+            max-width: 700px;
+        }
+
+        section {
+            margin-bottom: 72px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 56px 0;
+        }
+
+        /* ===== DIAGRAM 1: System Context ===== */
+        .ctx-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            grid-template-rows: auto auto auto;
+            gap: 20px;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .ctx-node {
+            border-radius: 12px;
+            padding: 20px 24px;
+            text-align: center;
+            width: 100%;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .ctx-node .name {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .ctx-node .role {
+            font-size: 12px;
+            opacity: 0.65;
+            line-height: 1.5;
+        }
+
+        .ctx-person {
+            background: var(--surface);
+            border: 1.5px dashed var(--border);
+        }
+
+        .ctx-system {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(59, 201, 219, 0.08));
+            border: 1.5px solid rgba(88, 166, 255, 0.3);
+            border-radius: 14px;
+        }
+
+        .ctx-container {
+            background: rgba(188, 140, 255, 0.06);
+            border: 1.5px solid rgba(188, 140, 255, 0.25);
+        }
+
+        .ctx-external {
+            background: rgba(240, 136, 62, 0.06);
+            border: 1.5px solid rgba(240, 136, 62, 0.2);
+        }
+
+        .ctx-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: var(--text-faint);
+            padding: 4px 0;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ctx-arrow .protocol {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--surface-2);
+        }
+
+        .ctx-arrow .protocol.ws {
+            color: var(--accent-cyan);
+            border: 1px solid rgba(59, 201, 219, 0.3);
+        }
+
+        .ctx-arrow .protocol.http {
+            color: var(--accent-orange);
+            border: 1px solid rgba(240, 136, 62, 0.3);
+        }
+
+        .ctx-arrow .protocol.docker {
+            color: var(--accent-blue);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+        }
+
+        .ctx-arrow svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ===== DIAGRAM 2: Internal Components ===== */
+        .comp-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .comp-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px 24px;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .comp-card:hover {
+            border-color: rgba(88, 166, 255, 0.4);
+        }
+
+        .comp-card .tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .comp-card .tag.core {
+            background: rgba(88, 166, 255, 0.12);
+            color: var(--accent-blue);
+        }
+
+        .comp-card .tag.infra {
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--accent-green);
+        }
+
+        .comp-card .tag.agent {
+            background: rgba(188, 140, 255, 0.12);
+            color: var(--accent-purple);
+        }
+
+        .comp-card .tag.safety {
+            background: rgba(248, 81, 73, 0.12);
+            color: var(--accent-red);
+        }
+
+        .comp-card .tag.tool {
+            background: rgba(57, 208, 216, 0.12);
+            color: var(--accent-teal);
+        }
+
+        .comp-card .name {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .comp-card .file {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+
+        .comp-card .desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .comp-card.span2 {
+            grid-column: span 2;
+        }
+
+        .comp-card.span3 {
+            grid-column: span 3;
+        }
+
+        /* Flow arrow row */
+        .flow-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px 0;
+            color: var(--text-faint);
+            font-size: 12px;
+        }
+
+        .flow-row .arrow {
+            font-size: 20px;
+            color: var(--accent-blue);
+        }
+
+        .flow-row .label {
+            font-size: 11px;
+            background: var(--surface-2);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        /* ===== DIAGRAM 3: Detail Loop ===== */
+        .loop-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 40px;
+            max-width: 850px;
+        }
+
+        .loop-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .loop-subtitle {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 28px;
+        }
+
+        .loop-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .loop-step {
+            display: flex;
+            align-items: stretch;
+            gap: 16px;
+        }
+
+        .loop-rail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 40px;
+            flex-shrink: 0;
+        }
+
+        .loop-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            border: 2px solid;
+        }
+
+        .loop-line {
+            width: 2px;
+            flex-grow: 1;
+            min-height: 12px;
+        }
+
+        .loop-content {
+            padding-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .loop-content .step-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .loop-content .step-desc {
+            font-size: 12.5px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        /* Loop colors */
+        .c-cyan .loop-num {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .c-cyan .loop-line {
+            background: rgba(59, 201, 219, 0.2);
+        }
+
+        .c-cyan .step-name {
+            color: var(--accent-cyan);
+        }
+
+        .c-green .loop-num {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .c-green .loop-line {
+            background: rgba(63, 185, 80, 0.2);
+        }
+
+        .c-green .step-name {
+            color: var(--accent-green);
+        }
+
+        .c-yellow .loop-num {
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
+        .c-yellow .loop-line {
+            background: rgba(210, 153, 34, 0.2);
+        }
+
+        .c-yellow .step-name {
+            color: var(--accent-yellow);
+        }
+
+        .c-purple .loop-num {
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .c-purple .loop-line {
+            background: rgba(188, 140, 255, 0.2);
+        }
+
+        .c-purple .step-name {
+            color: var(--accent-purple);
+        }
+
+        .c-red .loop-num {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .c-red .loop-line {
+            background: rgba(248, 81, 73, 0.2);
+        }
+
+        .c-red .step-name {
+            color: var(--accent-red);
+        }
+
+        .c-blue .loop-num {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .c-blue .loop-line {
+            background: rgba(88, 166, 255, 0.2);
+        }
+
+        .c-blue .step-name {
+            color: var(--accent-blue);
+        }
+
+        .c-orange .loop-num {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .c-orange .loop-line {
+            background: rgba(240, 136, 62, 0.2);
+        }
+
+        .c-orange .step-name {
+            color: var(--accent-orange);
+        }
+
+        /* Loop-back arrow */
+        .loop-back {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            padding: 12px 16px;
+            background: rgba(210, 153, 34, 0.06);
+            border: 1px solid rgba(210, 153, 34, 0.2);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--accent-yellow);
+        }
+
+        .loop-back .icon {
+            font-size: 18px;
+        }
+
+        /* ===== DIAGRAM 4: Realtime Flow ===== */
+        .rt-flow {
+            display: grid;
+            grid-template-columns: 1fr 100px 1fr 100px 1fr;
+            gap: 0;
+            align-items: center;
+        }
+
+        .rt-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .rt-box .name {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .rt-box .desc {
+            font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .rt-arrow {
+            text-align: center;
+            color: var(--text-faint);
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rt-arrow .line {
+            width: 60px;
+            height: 2px;
+            position: relative;
+        }
+
+        .rt-arrow .line::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: -4px;
+            border: 5px solid transparent;
+        }
+
+        .rt-arrow.right .line {
+            background: var(--accent-cyan);
+        }
+
+        .rt-arrow.right .line::after {
+            border-left-color: var(--accent-cyan);
+        }
+
+        .rt-arrow.left .line {
+            background: var(--accent-orange);
+        }
+
+        .rt-arrow.left .line::after {
+            border-right-color: var(--accent-orange);
+            right: auto;
+            left: -1px;
+        }
+
+        .rt-arrow .proto {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+
+        .rt-messages {
+            margin-top: 24px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .rt-msg {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+        }
+
+        .rt-msg .type {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .rt-msg .info {
+            font-size: 11px;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 16px 20px;
+            background: var(--surface);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-top: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page-title">ICARUS Architecture</div>
+    <p class="page-subtitle">v1.2.0 — Autonomous Software Development Environment</p>
+
+    <!-- ====================================================================== -->
+    <!-- DIAGRAM 1: System Context                                               -->
+    <!-- ====================================================================== -->
+    <section>
+        <div class="section-label">Diagram 1 of 4</div>
+        <h2 class="section-title">System Context</h2>
+        <p class="section-desc">High-level view of who interacts with ICARUS and what external systems it depends on.
+            Each box represents an actor or system boundary.</p>
+
+        <div class="ctx-grid" style="max-width: 900px;">
+            <!-- Row 1: User -->
+            <div></div>
+            <div class="ctx-node ctx-person">
+                <div class="name">👤 Developer</div>
+                <div class="role">Submits coding tasks via CLI or REST API. Reviews generated code and approves or
+                    rejects before deployment.</div>
+            </div>
+            <div></div>
+
+            <!-- Row 2: Arrow down -->
+            <div></div>
+            <div class="ctx-arrow">
+                <span class="protocol http">REST API</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                </svg>
+            </div>
+            <div></div>
+
+            <!-- Row 3: Main system + satellites -->
+            <div class="ctx-node ctx-external" style="min-height:140px;">
+                <div class="name" style="color:var(--accent-orange);">React Dashboard</div>
+                <div class="role">Real-time web UI for monitoring job progress, viewing audit reports, and approving
+                    changes.</div>
+            </div>
+
+            <div class="ctx-node ctx-system" style="min-height:200px; padding:28px;">
+                <div class="name" style="color:var(--accent-blue); font-size:20px;">ICARUS Orchestrator</div>
+                <div class="role" style="font-size:13px;">
+                    Central coordinator that receives tasks, queues jobs, spawns isolated agent containers, collects
+                    results, and gates human approval. The brain of the system.
+                </div>
+            </div>
+
+            <div class="ctx-node ctx-external" style="min-height:140px;">
+                <div class="name" style="color:var(--accent-orange);">External Services</div>
+                <div class="role">Docker Engine for container isolation. Discord for alert notifications. Tavily/Jina
+                    for web search.</div>
+            </div>
+
+            <!-- Row 4: Arrow down -->
+            <div></div>
+            <div class="ctx-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                </svg>
+                <span class="protocol docker">Docker + WebSocket</span>
+            </div>
+            <div></div>
+
+            <!-- Row 5: Agents -->
+            <div class="ctx-node ctx-container">
+                <div class="name" style="color:var(--accent-purple);">Builder Agent</div>
+                <div class="role">Runs inside a Docker container. Generates code to fulfill the task, validates it, and
+                    iteratively improves using LLM-driven reflection.</div>
+            </div>
+
+            <div class="ctx-node ctx-container">
+                <div class="name" style="color:var(--accent-purple);">Checker Agent</div>
+                <div class="role">Runs in a read-only container. Audits the Builder's output with linters, security
+                    scanners, and logic verification. Produces an audit report.</div>
+            </div>
+
+            <div class="ctx-node" style="background:rgba(248,81,73,0.06); border:1.5px solid rgba(248,81,73,0.2);">
+                <div class="name" style="color:var(--accent-red);">System Sentinel</div>
+                <div class="role">Continuously monitors CPU and RAM. Pauses containers and blocks new jobs when
+                    resources are critical.</div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-swatch"
+                    style="background:rgba(88,166,255,0.3); border:1px solid var(--accent-blue);"></div>Core System
+            </div>
+            <div class="legend-item">
+                <div class="legend-swatch"
+                    style="background:rgba(188,140,255,0.3); border:1px solid var(--accent-purple);"></div>Agent
+                Container
+            </div>
+            <div class="legend-item">
+                <div class="legend-swatch"
+                    style="background:rgba(240,136,62,0.3); border:1px solid var(--accent-orange);"></div>External
+                Service
+            </div>
+            <div class="legend-item">
+                <div class="legend-swatch" style="background:rgba(248,81,73,0.3); border:1px solid var(--accent-red);">
+                </div>Safety System
+            </div>
+            <div class="legend-item">
+                <div class="legend-swatch" style="border:1.5px dashed var(--border);"></div>Human Actor
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- ====================================================================== -->
+    <!-- DIAGRAM 2: Orchestrator Internals                                       -->
+    <!-- ====================================================================== -->
+    <section>
+        <div class="section-label">Diagram 2 of 4</div>
+        <h2 class="section-title">Orchestrator Internals</h2>
+        <p class="section-desc">Inside the Orchestrator: what each component does and how they collaborate to process
+            jobs.</p>
+
+        <div class="comp-layout">
+            <div class="comp-card span3">
+                <span class="tag core">Core</span>
+                <div class="name">FastAPI Application</div>
+                <div class="file">orchestrator/main.py</div>
+                <div class="desc">
+                    The entry point. Exposes REST endpoints for submitting jobs, checking status, and approving work.
+                    Also hosts two WebSocket endpoints — one for agents to stream events to the orchestrator, and one
+                    for the dashboard to receive live updates. Coordinates all other components through
+                    dependency-injected application state.
+                </div>
+            </div>
+
+            <div class="comp-card">
+                <span class="tag core">Core</span>
+                <div class="name">WebSocket Gateway</div>
+                <div class="file">orchestrator/gateway.py</div>
+                <div class="desc">
+                    Manages persistent connections between agents and the orchestrator. When an agent sends telemetry,
+                    errors, or completion signals, the gateway processes them and simultaneously broadcasts updates to
+                    any dashboard clients watching that job.
+                </div>
+            </div>
+
+            <div class="comp-card">
+                <span class="tag core">Core</span>
+                <div class="name">Job Queue</div>
+                <div class="file">orchestrator/job_queue.py</div>
+                <div class="desc">
+                    Owns the entire job lifecycle. Queues incoming tasks, spawns Builder and Checker containers in
+                    sequence, monitors their execution with timeout protection, and holds jobs for human approval before
+                    finalization. The largest module at 564 lines.
+                </div>
+            </div>
+
+            <div class="comp-card">
+                <span class="tag infra">Infrastructure</span>
+                <div class="name">Docker Manager</div>
+                <div class="file">orchestrator/docker_manager.py</div>
+                <div class="desc">
+                    Interface to the Docker daemon. Creates isolated workspace volumes, spawns agent containers with
+                    resource limits and network restrictions, and collects container-level CPU/memory statistics for
+                    telemetry.
+                </div>
+            </div>
+
+            <div class="comp-card">
+                <span class="tag infra">Infrastructure</span>
+                <div class="name">Database</div>
+                <div class="file">orchestrator/database.py</div>
+                <div class="desc">
+                    Persistent storage via SQLAlchemy with async SQLite sessions. Stores job records, telemetry
+                    snapshots, and audit reports. Provides the data backing for the dashboard and status API endpoints.
+                </div>
+            </div>
+
+            <div class="comp-card">
+                <span class="tag infra">Infrastructure</span>
+                <div class="name">Application State</div>
+                <div class="file">orchestrator/state.py</div>
+                <div class="desc">
+                    A simple dataclass that holds references to all shared services (DB, Docker, Jobs, Sentinel).
+                    Injected into every request handler via FastAPI dependency injection, replacing global variables.
+                </div>
+            </div>
+
+            <div class="comp-card">
+                <span class="tag safety">Safety</span>
+                <div class="name">System Sentinel</div>
+                <div class="file">sentinel/monitor.py</div>
+                <div class="desc">
+                    Background service that polls CPU and RAM every 5 seconds. At 80% (Yellow), blocks new jobs from
+                    starting. At 90% (Red), force-pauses all running containers and sends Discord alerts. Protects the
+                    host from resource exhaustion.
+                </div>
+            </div>
+
+            <div class="comp-card">
+                <span class="tag tool">Tooling</span>
+                <div class="name">Plugin System</div>
+                <div class="file">plugins/</div>
+                <div class="desc">
+                    Extensible tool framework. Wraps concrete capabilities (web search, filesystem access, GitHub,
+                    Discord) in a standardized interface. Plugins are auto-discovered at startup and can be added
+                    without modifying core code.
+                </div>
+            </div>
+
+            <div class="comp-card">
+                <span class="tag tool">Tooling</span>
+                <div class="name">MCP Tools</div>
+                <div class="file">mcp_tools/</div>
+                <div class="desc">
+                    The concrete implementation layer. Each MCP class handles a specific external integration — API
+                    calls, file operations, Git commands. Plugins wrap these to expose them through a uniform interface.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- ====================================================================== -->
+    <!-- DIAGRAM 3: Builder Reflection Loop                                      -->
+    <!-- ====================================================================== -->
+    <section>
+        <div class="section-label">Diagram 3 of 4</div>
+        <h2 class="section-title">Builder Agent — Code Generation Loop</h2>
+        <p class="section-desc">How the Builder agent iteratively generates, validates, and improves code inside its
+            container. This is the core autonomous development cycle.</p>
+
+        <div class="loop-container">
+            <div class="loop-title">Reflection-Driven Code Generation</div>
+            <div class="loop-subtitle">Up to 3 iterations per task. Exits early on success or when max iterations are
+                reached.</div>
+
+            <div class="loop-steps">
+                <div class="loop-step c-cyan">
+                    <div class="loop-rail">
+                        <div class="loop-num">1</div>
+                        <div class="loop-line"></div>
+                    </div>
+                    <div class="loop-content">
+                        <div class="step-name">Receive Task</div>
+                        <div class="step-desc">Builder starts inside a fresh Docker container, connects to the
+                            Orchestrator via WebSocket, and reads the task description from its environment variables.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loop-step c-blue">
+                    <div class="loop-rail">
+                        <div class="loop-num">2</div>
+                        <div class="loop-line"></div>
+                    </div>
+                    <div class="loop-content">
+                        <div class="step-name">Generate Code</div>
+                        <div class="step-desc">Sends the task to the LLM client to produce an initial code solution. The
+                            LLM response is parsed to extract Python code blocks. Reports progress to the Orchestrator
+                            ("generating code").</div>
+                    </div>
+                </div>
+
+                <div class="loop-step c-green">
+                    <div class="loop-rail">
+                        <div class="loop-num">3</div>
+                        <div class="loop-line"></div>
+                    </div>
+                    <div class="loop-content">
+                        <div class="step-name">Validate Output</div>
+                        <div class="step-desc">The Validation Runner checks syntax via AST parsing, then runs flake8 for
+                            style and import issues. If user-provided tests exist, the Test Executor runs them with
+                            pytest. Results are structured as pass/fail with detailed error lists.</div>
+                    </div>
+                </div>
+
+                <div class="loop-step c-yellow">
+                    <div class="loop-rail">
+                        <div class="loop-num">4</div>
+                        <div class="loop-line"></div>
+                    </div>
+                    <div class="loop-content">
+                        <div class="step-name">Reflect &amp; Improve</div>
+                        <div class="step-desc">If validation fails, the Reflection Engine constructs a prompt containing
+                            the original task, the failed code, all error messages, and history from previous attempts.
+                            It sends this to the LLM to produce an improved version that addresses the specific
+                            failures.</div>
+
+                        <div class="loop-back">
+                            <span class="icon">↩</span>
+                            <span>If still failing: loop back to Step 3 with improved code (max 3 total
+                                iterations)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loop-step c-green">
+                    <div class="loop-rail">
+                        <div class="loop-num">5</div>
+                        <div class="loop-line"></div>
+                    </div>
+                    <div class="loop-content">
+                        <div class="step-name">Write to Workspace</div>
+                        <div class="step-desc">Once code passes validation (or max iterations reached), the final
+                            version is written to the shared Docker volume at /workspace. This volume is then mounted
+                            read-only by the Checker agent.</div>
+                    </div>
+                </div>
+
+                <div class="loop-step c-purple">
+                    <div class="loop-rail">
+                        <div class="loop-num">6</div>
+                        <div class="loop-line" style="min-height:0;"></div>
+                    </div>
+                    <div class="loop-content">
+                        <div class="step-name">Signal Completion</div>
+                        <div class="step-desc">Builder sends a "completed" message over its WebSocket connection. The
+                            Orchestrator stops telemetry collection, records the result, and proceeds to spawn the
+                            Checker agent.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- ====================================================================== -->
+    <!-- DIAGRAM 4: Real-Time Communication Flow                                 -->
+    <!-- ====================================================================== -->
+    <section>
+        <div class="section-label">Diagram 4 of 4</div>
+        <h2 class="section-title">Real-Time Communication</h2>
+        <p class="section-desc">How events flow from agent containers through the Orchestrator to the dashboard and
+            database in real time via WebSocket connections.</p>
+
+        <div class="rt-flow">
+            <div class="rt-box">
+                <div class="name" style="color:var(--accent-purple);">Agent Container</div>
+                <div class="desc">Streams events as they happen: CPU/RAM usage, current tool being used, errors
+                    encountered, and completion signals.</div>
+            </div>
+
+            <div class="rt-arrow right">
+                <span class="proto">WebSocket</span>
+                <div class="line"></div>
+                <span style="font-size:10px;">/ws/agent/{job_id}</span>
+            </div>
+
+            <div class="rt-box" style="border-color:rgba(88,166,255,0.3);">
+                <div class="name" style="color:var(--accent-blue);">Gateway</div>
+                <div class="desc">Receives agent messages, stores telemetry and audit data in the database, then
+                    immediately forwards to any connected dashboard clients.</div>
+            </div>
+
+            <div class="rt-arrow right">
+                <span class="proto">WebSocket</span>
+                <div class="line"></div>
+                <span style="font-size:10px;">/ws/dashboard/{job_id}</span>
+            </div>
+
+            <div class="rt-box" style="border-color:rgba(240,136,62,0.3);">
+                <div class="name" style="color:var(--accent-orange);">Dashboard</div>
+                <div class="desc">Displays live CPU charts, current tool activity, and audit results as they arrive.
+                    Multiple users can watch the same job simultaneously.</div>
+            </div>
+        </div>
+
+        <div class="rt-messages">
+            <div class="rt-msg">
+                <div class="type" style="color:var(--accent-cyan);">Telemetry</div>
+                <div class="info">CPU usage %, RAM usage in MB, name of the tool or function currently executing. Sent
+                    every few seconds while agent is active.</div>
+            </div>
+            <div class="rt-msg">
+                <div class="type" style="color:var(--accent-purple);">Audit Report</div>
+                <div class="info">Full code audit results from the Checker: linting errors, security findings, logic
+                    verification outcomes. Sent once per check.</div>
+            </div>
+            <div class="rt-msg">
+                <div class="type" style="color:var(--accent-red);">Error</div>
+                <div class="info">Agent-reported failures: container crashes, timeout exceeded, LLM errors. Triggers
+                    early job termination and user notification.</div>
+            </div>
+            <div class="rt-msg">
+                <div class="type" style="color:var(--accent-green);">Completion</div>
+                <div class="info">Success signal from agent. Orchestrator stops monitoring, finalizes records, and
+                    transitions the job to the next stage.</div>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+</html>
